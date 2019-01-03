@@ -22,8 +22,10 @@ lfc <- spi %>%
 
 #------------------------------------------------------------------------------
 
-# Function to simulate 1 match 
-sample(c(3, 0, 1), 1, replace=T, prob=c(.316, .440, 0.244))
+# Function to simulate match 
+pred_result <- function(n, win, loss, draw) {
+  sample(c(3, 0, 1), n, replace=T, prob=c(win, loss, draw)) 
+}
 
 #------------------------------------------------------------------------------
 
