@@ -54,4 +54,14 @@ pred_season <- function(lfc_data) {
 
 #------------------------------------------------------------------------------
 
-pred_season(lfc)
+# Simulate seasons
+# Initialize list
+sims <- vector("list", length = 100)
+
+# Function to simulate season and add to list
+build_list <- function(i) {
+  sims[[i]] <<- pred_season(lfc) 
+}
+
+# Simulate
+c(1:100) %>% walk(build_list)
