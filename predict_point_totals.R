@@ -30,17 +30,28 @@ pred_result <- function(win, loss, draw) {
 
 #------------------------------------------------------------------------------
 
-# Predict home games
-pred_home <- lfc %>% 
-  filter(team1 == "Liverpool") %>%
-  mutate(result = pmap_dbl(list(prob1, prob2, probtie), pred_result)) %>% 
-  select(date, team1, team2, prob1, prob2, probtie, result)
+# Function to predict all matches 
+pred_season <- function(lfc_data) {
+  
+  # Predict home games
+  pred_home <- lfc_data %>% 
+    filter(team1 == "Liverpool") %>%
+    mutate(result = pmap_dbl(list(prob1, prob2, probtie), pred_result)) %>% 
+    select(date, team1, team2, prob1, prob2, probtie, result)
+  
+  # Predict away games
+  pred_away <- lfc_data %>% 
+    filter(team2 == "Liverpool") %>%
+    mutate(result = pmap_dbl(list(prob2, prob1, probtie), pred_result)) %>% 
+    select(date, team1, team2, prob1, prob2, probtie, result) 
+  
+  # Combine
+  bind_rows(pred_home, pred_away) %>% 
+    arrange(date) %>% 
+    mutate(adj_points = ifelse(date == min(lfc_data$date), 54 + result, result), 
+           total_points = cumsum(adj_points))
+}
 
-# Predict away games
-pred_away <- lfc %>% 
-  filter(team2 == "Liverpool") %>%
-  mutate(result = pmap_dbl(list(prob2, prob1, probtie), pred_result)) %>% 
-  select(date, team1, team2, prob1, prob2, probtie, result) 
+#------------------------------------------------------------------------------
 
-pred_all <- bind_rows(pred_home, pred_away) %>% 
-  arrange(date)
+pred_season(lfc)
