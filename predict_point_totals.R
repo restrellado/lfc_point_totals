@@ -56,7 +56,7 @@ pred_season <- function(lfc_data) {
 
 # Simulate seasons
 # Initialize list
-sims <- vector("list", length = 100)
+sims <- vector("list", length = 1000)
 
 # Function to simulate season and add to list
 build_list <- function(i) {
@@ -64,4 +64,13 @@ build_list <- function(i) {
 }
 
 # Simulate
-c(1:100) %>% walk(build_list)
+c(1:1000) %>% walk(build_list) 
+
+# Combine into one dataset
+all_sims <- bind_rows(sims)
+
+#------------------------------------------------------------------------------
+
+# Split simultations by match
+by_match <- all_sims %>% 
+  split(.$date)
