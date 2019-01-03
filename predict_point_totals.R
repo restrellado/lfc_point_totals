@@ -16,19 +16,31 @@ spi <- read_csv("data/spi_matches.csv")
 
 # Build Liverpool dataset 
 lfc <- spi %>% 
-  filter(team1 == "Liverpool" | team2 == "Liverpool", 
+  filter(league_id == 2411,
+         team1 == "Liverpool" | team2 == "Liverpool", 
          # Filter for future games
          date > ymd(20190102))
 
 #------------------------------------------------------------------------------
 
 # Function to simulate match 
-pred_result <- function(n, win, loss, draw) {
-  sample(c(3, 0, 1), n, replace=T, prob=c(win, loss, draw)) 
+pred_result <- function(win, loss, draw) {
+  sample(c(3, 0, 1), 1, replace=T, prob=c(win, loss, draw)) 
 }
 
 #------------------------------------------------------------------------------
 
-# Simulate matches
+# Predict home games
+pred_home <- lfc %>% 
+  filter(team1 == "Liverpool") %>%
+  mutate(result = pmap_dbl(list(prob1, prob2, probtie), pred_result)) %>% 
+  select(date, team1, team2, prob1, prob2, probtie, result)
 
-test <- sample(c(3, 0, 1), 10000, replace=T, prob=c(.316, .440, 0.244))
+# Predict away games
+pred_away <- lfc %>% 
+  filter(team2 == "Liverpool") %>%
+  mutate(result = pmap_dbl(list(prob2, prob1, probtie), pred_result)) %>% 
+  select(date, team1, team2, prob1, prob2, probtie, result) 
+
+pred_all <- bind_rows(pred_home, pred_away) %>% 
+  arrange(date)
