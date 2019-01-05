@@ -2,10 +2,10 @@ library(tidyverse)
 library(lubridate)
 
 # Thanks for the data fivethirtyeight!
-# download.file(
-#   "https://projects.fivethirtyeight.com/soccer-api/club/spi_matches.csv", 
-#   destfile = "data/spi_matches.csv"
-#   )
+download.file(
+  "https://projects.fivethirtyeight.com/soccer-api/club/spi_matches.csv",
+  destfile = "data/spi_matches.csv"
+  )
 
 #------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ lfc <- spi %>%
   filter(league_id == 2411,
          team1 == "Liverpool" | team2 == "Liverpool", 
          # Filter for future games
-         date > ymd(20190102))
+         date > Sys.Date())
 
 #------------------------------------------------------------------------------
 
