@@ -31,7 +31,7 @@ pred_result <- function(win, loss, draw) {
 #------------------------------------------------------------------------------
 
 # Function to predict all matches 
-pred_season <- function(lfc_data) {
+pred_season <- function(lfc_data, curr_points) {
   
   # Predict home games
   pred_home <- lfc_data %>% 
@@ -48,7 +48,7 @@ pred_season <- function(lfc_data) {
   # Combine
   bind_rows(pred_home, pred_away) %>% 
     arrange(date) %>% 
-    mutate(adj_points = ifelse(date == min(lfc_data$date), 54 + result, result), 
+    mutate(adj_points = ifelse(date == min(lfc_data$date), curr_points + result, result), 
            total_points = cumsum(adj_points))
 }
 
@@ -60,11 +60,12 @@ sims <- vector("list", length = 1000)
 
 # Function to simulate season and add to list
 build_list <- function(i) {
-  sims[[i]] <<- pred_season(lfc) 
+  # Remember to update current point argument
+  sims[[i]] <<- pred_season(lfc, 54) 
 }
 
 # Simulate
-c(1:1000) %>% walk(build_list) 
+c(1:10000) %>% walk(build_list) 
 
 # Combine into one dataset
 all_sims <- bind_rows(sims)
@@ -74,3 +75,15 @@ all_sims <- bind_rows(sims)
 # Split simultations by match
 by_match <- all_sims %>% 
   split(.$date)
+
+#------------------------------------------------------------------------------
+
+# Analyze match outcomes 
+
+calc_range <- function(home, away) {
+  match <- all_sims %>% 
+    filter(team1 == home, team2 == away) 
+  
+  # Assume normal distribution
+  quantile(match$total_points, probs = c(.05, .95)) 
+}
